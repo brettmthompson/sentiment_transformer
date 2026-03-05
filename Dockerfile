@@ -11,16 +11,15 @@ ENV TRANSFORMERS_CACHE=/app/.cache/transformers
 ENV HF_HUB_CACHE=/app/.cache/hub
 
 # Copy dependency files first for better layer caching
-COPY pyproject.toml README.md ./
+COPY requirements.txt ./
 
-# Install CPU-only torch first from PyTorch index
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-
-# Copy application code (needed before installing the package)
+# Copy application code
 COPY sentiment_transformer/ ./sentiment_transformer/
 
-# Install the package and remaining dependencies (torch already satisfied)
-RUN pip install --no-cache-dir .
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://pypi.org/simple
 
 # Expose port
 EXPOSE 8080

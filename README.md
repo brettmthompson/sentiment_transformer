@@ -82,15 +82,23 @@ A single KServe transformer that handles both preprocessing and postprocessing. 
 # Install uv if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies and the package
+# Install dependencies and the project package
 uv sync
 ```
 
-### Using pip (alternative)
+**Note**: This installs **both dependencies and the project package** with the standard PyTorch package including GPU dependencies (~2-4GB). For CPU-only environments, see the pip alternative below.
+
+### Using pip (alternative - CPU-only PyTorch)
+
+For a lighter installation using CPU-only PyTorch (~150-200MB):
 
 ```bash
-pip install -e .
+pip install -r requirements.txt \
+  --index-url https://download.pytorch.org/whl/cpu \
+  --extra-index-url https://pypi.org/simple
 ```
+
+**Note**: This installs **only the dependencies** (not the project package itself) using lightweight CPU-only PyTorch. This is useful for containerized deployments where you only need the dependencies installed, and the application code is mounted separately. For local development, use `uv sync` instead.
 
 ## Usage and Deployment
 

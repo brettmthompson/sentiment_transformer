@@ -30,8 +30,8 @@ For testing the transformer logic locally without deploying to KServe:
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install project dependencies
-uv sync --no-install-project
+# Install project dependencies and the project itself
+uv sync
 ```
 
 ### Step 2: Test the Transformer
@@ -191,14 +191,14 @@ kubectl wait --for=condition=Ready inferenceservice/sentiment-analysis --timeout
 
 ### 5. Test the Deployed Service
 
-Get the service URL:
+Port forward to the transformer service:
 ```bash
-SERVICE_URL=$(kubectl get inferenceservice sentiment-analysis -o jsonpath='{.status.url}')
+kubectl port-forward svc/sentiment-analysis-transformer 8080:80
 ```
 
-Test with curl:
+In another terminal, test with curl:
 ```bash
-curl -X POST $SERVICE_URL/v1/models/sentiment-analysis:predict \
+curl -X POST http://localhost:8080/v1/models/sentiment-analysis:predict \
   -H "Content-Type: application/json" \
   -d '{
     "texts": [
