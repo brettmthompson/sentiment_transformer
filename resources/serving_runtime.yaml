@@ -1,0 +1,79 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: mlserver-runtime
+  annotations:
+    openshift.io/display-name: MLServer ServingRuntime for KServe - Tech Preview
+    opendatahub.io/runtime-version: '1.7.1'
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  annotations:
+    opendatahub.io/kserve-runtime: 'mlserver'
+    prometheus.io/port: '8082'
+    prometheus.io/path: /metrics
+    monitoring.opendatahub.io/scrape: 'true'
+  containers:
+    - name: kserve-container
+      image: quay.io/opendatahub/mlserver:fast
+      env:
+        - name: MLSERVER_MODEL_NAME
+          value: sentiment-analysis
+        - name: MLSERVER_HTTP_PORT
+          value: '8080'
+        - name: MLSERVER_MODELS_DIR
+          value: /mnt/models
+      startupProbe:
+        initialDelaySeconds: 1
+        periodSeconds: 1
+        failureThreshold: 1
+        exec:
+          command:
+            - /bin/sh
+            - -c
+            - |
+              [ -n "$(ls -A /mnt/models 2>/dev/null)" ]
+      readinessProbe:
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        failureThreshold: 3
+        timeoutSeconds: 5
+        httpGet:
+          path: /v2/models/sentiment-analysis/ready
+          port: 8080
+      livenessProbe:
+        initialDelaySeconds: 20
+        periodSeconds: 10
+        failureThreshold: 6
+        timeoutSeconds: 5
+        httpGet:
+          path: /v2/models/sentiment-analysis/ready
+          port: 8080
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        privileged: false
+        runAsNonRoot: true
+  protocolVersions:
+    - v2
+  multiModel: false
+  supportedModelFormats:
+    - name: onnx
+      version: '1'
+    - name: sklearn
+      version: '0'
+    - name: sklearn
+      version: '1'
+    - name: xgboost
+      version: '1'
+    - name: xgboost
+      version: '2'
+    - name: lightgbm
+      version: '3'
+    - name: lightgbm
+      version: '4'

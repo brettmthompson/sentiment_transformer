@@ -1,0 +1,31 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: sentiment-analysis
+  annotations:
+    serving.kserve.io/deploymentMode: "Standard"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: onnx
+      runtime: mlserver-runtime
+      storageUri: "hf://optimum/distilbert-base-uncased-finetuned-sst-2-english"
+      env:
+      - name: MLSERVER_MODEL_IMPLEMENTATION
+        value: mlserver_onnx.OnnxModel
+      - name: MLSERVER_MODEL_URI
+        value: /mnt/models
+
+  transformer:
+    containers:
+    - name: kserve-container
+      image: quay.io/your-username/sentiment-transformer:latest
+      args:
+      - --model-name=sentiment-analysis
+      - --tokenizer_name=optimum/distilbert-base-uncased-finetuned-sst-2-english
+      - --sentiment_labels=negative,positive
+      - --max_length=128
+      - --input_names=input_ids,attention_mask
+      - --output_name=predict
+      - --include_star_rating

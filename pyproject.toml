@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentiment-transformer"
+version = "0.1.0"
+description = "KServe sentiment analysis transformers with preprocessing and postprocessing"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Brett Thompson"}
+]
+dependencies = [
+    "kserve>=0.11.0",
+    "transformers>=4.30.0",
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+]
